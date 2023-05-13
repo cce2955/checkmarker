@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // Get the "check-all" button
   var checkAllButton = document.getElementById("check-all");
 
+  // Get the flip switch checkbox
+  var flipSwitch = document.getElementById("flip-switch");
+
   // Add a click event listener to the "check-all" button
   checkAllButton.addEventListener("click", function () {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -20,31 +23,44 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Get the "set-text" button
-  var setTextButton = document.getElementById("set-text");
+  // Add a change event listener to the flip switch checkbox
+  flipSwitch.addEventListener("change", function () {
+    if (this.checked) {
+      // Set a variable to true when the flip switch is on
+      chrome.storage.sync.set({ automaticCheckAllEnabled: true }, function() {
+        console.log('Automatic check-all enabled');
+      });
+    } else {
+      // Set a variable to false when the flip switch is off
+      chrome.storage.sync.set({ automaticCheckAllEnabled: false }, function() {
+        console.log('Automatic check-all disabled');
+      });
+    }
+  });
 
-  // Add a click event listener to the "set-text" button
-  setTextButton.addEventListener("click", function () {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      var tabId = tabs[0].id;
-      var textField = document.getElementById("text-field");
-      var textValue = textField.value.trim();
-      if (textValue !== "") {
+  // Listen for updates to the active tab
+  chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+    // Check if the flip switch is on
+    chrome.storage.sync.get(['automaticCheckAllEnabled'], function(result) {
+      if (result.automaticCheckAllEnabled) {
+        // Automatically apply the checkAll code when a new page is loaded and the flip switch is on
         chrome.scripting.executeScript(
           {
-            target: { tabId: tabId },
+            target: { tabId: tab.id },
             files: ["content.js"],
           },
           function () {
-            chrome.tabs.sendMessage(tabId, {
-              action: "setText",
-              text: textValue,
+            chrome.tabs.sendMessage(tab.id, {
+              action: "checkAll"
             });
           }
         );
-      } else {
-        console.log("text-field is empty");
       }
     });
+  });
+
+  // Load the status of the flip switch from storage
+  chrome.storage.sync.get(['automaticCheckAllEnabled'], function(result) {
+    flipSwitch.checked = result.automaticCheckAllEnabled;
   });
 });
