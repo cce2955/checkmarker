@@ -1,4 +1,21 @@
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+  if (message.action == "updateTextFields") {
+    chrome.storage.sync.get("addedText", function(data) {
+      let text = data.addedText;
+      if (text) {
+        let textFields = document.getElementsByTagName("input");
+        for (let i = 0; i < textFields.length; i++) {
+          if (textFields[i].type == "text") {
+            textFields[i].value = text;
+          }
+        }
+      }
+    });
+  }
+});
+
 chrome.storage.sync.get("autoCheckAll", function(data) {
+  let autoCheckAll = data.autoCheckAll;
   if (data.autoCheckAll) {
     const checkboxes = document.querySelectorAll("input[type='checkbox']");
     checkboxes.forEach(checkbox => {
