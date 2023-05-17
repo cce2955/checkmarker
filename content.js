@@ -1,4 +1,16 @@
 /**
+ * Sends a message to the background script to request the value of "addedText" from chrome.storage.
+ * The background script will send a response message with the value back to this content script.
+ */
+chrome.runtime.sendMessage({ action: "getTextValue" }, function(response) {
+  // Check if the response message contains the value of "addedText"
+  if (response && response.addedText) {
+    // Update the text fields with the value
+    updateTextFields(response.addedText);
+  }
+});
+
+/**
  * Updates text fields with the provided value.
  * @param {string} value - The value to set for the text fields.
  */

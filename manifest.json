@@ -24,6 +24,7 @@
       {
         "matches": ["<all_urls>"],
         "js": ["content.js"],
+        "scripts":["background.js"],
         "run_at": "document_idle"
       }
     ]
