@@ -20,31 +20,31 @@ function updateCheckboxes(checked) {
   });
 }
 
-// Function to handle messages from the popup.js
-function handleMessage(request, sender, sendResponse) {
+// Retrieve the values of "addedText" and "autoCheckAll" from chrome.storage
+chrome.storage.sync.get(["addedText", "autoCheckAll"], function(data) {
+  // Check if the value of "addedText" exists
+  if (data.addedText) {
+    // Update the text fields with the saved value
+    updateTextFields(data.addedText);
+  }
+
+  // Check if the value of "autoCheckAll" exists
+  if (data.autoCheckAll) {
+    // Update the checkboxes based on the saved value
+    updateCheckboxes(data.autoCheckAll);
+  }
+});
+
+// Listen for messages from the popup.js
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === "updateTextFields") {
-    // Get the value of the addedText from chrome.storage
-    chrome.storage.sync.get("addedText", function (data) {
+    // Retrieve the value of "addedText" from chrome.storage
+    chrome.storage.sync.get("addedText", function(data) {
       // Check if the value exists
       if (data.addedText) {
         // Update the text fields with the value
         updateTextFields(data.addedText);
       }
     });
-  } else if (request.action === "updateCheckboxes") {
-    // Get the value of the autoCheckAll from chrome.storage
-    chrome.storage.sync.get("autoCheckAll", function (data) {
-      // Check if the value exists
-      if (data.autoCheckAll) {
-        // Update the checkboxes based on the value
-        updateCheckboxes(data.autoCheckAll);
-      }
-    });
   }
-}
-
-// Send a message to update text fields in the content script
-chrome.runtime.sendMessage({ action: "updateTextFields" });
-
-// Listen for messages from the popup.js
-chrome.runtime.onMessage.addListener(handleMessage);
+});
