@@ -4,6 +4,27 @@ document.addEventListener("DOMContentLoaded", function() {
   let flipSwitch = document.getElementById("flip-switch");
   let textField = document.getElementById("text-field");
   let submitButton = document.getElementById("submit-button");
+  let toggleButton = document.getElementById("toggle-button");
+   /**
+   * Event listener for the click event of the toggle button.
+   * Toggles the extension on and off by enabling/disabling the flip switch.
+   */
+   toggleButton.addEventListener("click", function() {
+    const toggleState = !flipSwitch.checked;
+    flipSwitch.checked = toggleState;
+    flipSwitch.disabled = toggleState;
+    toggleButton.textContent = toggleState ? "Enable" : "Disable";
+    textField.disabled = toggleState;
+    submitButton.disabled = toggleState;
+
+    if (toggleState) {
+      // Clear the stored data when disabling the extension
+      chrome.storage.sync.clear();
+    } else {
+      // Save the state of the flip switch to chrome.storage
+      chrome.storage.sync.set({ autoCheckAll: flipSwitch.checked });
+    }
+  });
 
   /**
    * Event listener for the change event of the flip switch.
