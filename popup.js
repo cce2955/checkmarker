@@ -5,19 +5,25 @@ document.addEventListener("DOMContentLoaded", function() {
 
   flipSwitch.addEventListener("change", function() {
     chrome.storage.sync.set({ autoCheckAll: flipSwitch.checked });
+    updateTextFields();
   });
 
   submitButton.addEventListener("click", function(event) {
     event.preventDefault();
     let text = textField.value;
     chrome.storage.sync.set({ addedText: text }, function() {
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: "updateTextFields" });
-      });
+      updateTextFields();
     });
   });
 
-  chrome.storage.sync.get("autoCheckAll", function(data) {
+  function updateTextFields() {
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, { action: "updateTextFields" });
+    });
+  }
+
+  chrome.storage.sync.get(["addedText", "autoCheckAll"], function(data) {
     flipSwitch.checked = data.autoCheckAll || false;
+    updateTextFields();
   });
 });
