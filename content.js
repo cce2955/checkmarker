@@ -1,42 +1,50 @@
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-  if (message.action === "updateTextFields") {
-    updateTextFields();
-  }
-});
+// Function to update text fields with the provided value
+function updateTextFields(value) {
+  // Get all the text fields on the page
+  let textFields = document.querySelectorAll("input[type='text']");
 
-function updateTextFields() {
-  chrome.storage.sync.get("addedText", function(data) {
-    let text = data.addedText || "";
-    let textFields = document.getElementsByTagName("input");
-    for (let i = 0; i < textFields.length; i++) {
-      if (textFields[i].type === "text") {
-        textFields[i].value = text;
-      }
-    }
+  // Loop through each text field and set the value
+  textFields.forEach(function (textField) {
+    textField.value = value;
   });
 }
 
-chrome.storage.sync.get("autoCheckAll", function(data) {
-  if (data.autoCheckAll) {
-    const checkboxes = document.querySelectorAll("input[type='checkbox']");
-    checkboxes.forEach(checkbox => {
-      checkbox.checked = true;
+// Function to check or uncheck all checkboxes based on the provided state
+function updateCheckboxes(checked) {
+  // Get all the checkboxes on the page
+  let checkboxes = document.querySelectorAll("input[type='checkbox']");
+
+  // Set the checked state of each checkbox
+  checkboxes.forEach(function (checkbox) {
+    checkbox.checked = checked;
+  });
+}
+
+// Function to handle messages from the popup.js
+function handleMessage(request, sender, sendResponse) {
+  if (request.action === "updateTextFields") {
+    // Get the value of the addedText from chrome.storage
+    chrome.storage.sync.get("addedText", function (data) {
+      // Check if the value exists
+      if (data.addedText) {
+        // Update the text fields with the value
+        updateTextFields(data.addedText);
+      }
+    });
+  } else if (request.action === "updateCheckboxes") {
+    // Get the value of the autoCheckAll from chrome.storage
+    chrome.storage.sync.get("autoCheckAll", function (data) {
+      // Check if the value exists
+      if (data.autoCheckAll) {
+        // Update the checkboxes based on the value
+        updateCheckboxes(data.autoCheckAll);
+      }
     });
   }
-});
+}
 
-chrome.storage.onChanged.addListener(function(changes, namespace) {
-  if (changes.autoCheckAll && changes.autoCheckAll.newValue) {
-    const checkboxes = document.querySelectorAll("input[type='checkbox']");
-    checkboxes.forEach(checkbox => {
-      checkbox.checked = true;
-    });
-  } else {
-    const checkboxes = document.querySelectorAll("input[type='checkbox']");
-    checkboxes.forEach(checkbox => {
-      checkbox.checked = false;
-    });
-  }
-});
+// Send a message to update text fields in the content script
+chrome.runtime.sendMessage({ action: "updateTextFields" });
 
-updateTextFields(); // Call updateTextFields initially when the content script is loaded
+// Listen for messages from the popup.js
+chrome.runtime.onMessage.addListener(handleMessage);
