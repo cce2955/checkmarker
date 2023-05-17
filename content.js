@@ -1,26 +1,26 @@
-// Function to update text fields with the provided value
+/**
+ * Updates text fields with the provided value.
+ * @param {string} value - The value to set for the text fields.
+ */
 function updateTextFields(value) {
-  // Get all the text fields on the page
   let textFields = document.querySelectorAll("input[type='text']");
-
-  // Loop through each text field and set the value
   textFields.forEach(function (textField) {
     textField.value = value;
   });
 }
 
-// Function to check or uncheck all checkboxes based on the provided state
+/**
+ * Updates checkboxes with the provided checked state.
+ * @param {boolean} checked - The checked state to set for the checkboxes.
+ */
 function updateCheckboxes(checked) {
-  // Get all the checkboxes on the page
   let checkboxes = document.querySelectorAll("input[type='checkbox']");
-
-  // Set the checked state of each checkbox
   checkboxes.forEach(function (checkbox) {
     checkbox.checked = checked;
   });
 }
 
-// Retrieve the values of "addedText" and "autoCheckAll" from chrome.storage
+// Retrieves the values of "addedText" and "autoCheckAll" from chrome.storage
 chrome.storage.sync.get(["addedText", "autoCheckAll"], function(data) {
   // Check if the value of "addedText" exists
   if (data.addedText) {
@@ -35,7 +35,10 @@ chrome.storage.sync.get(["addedText", "autoCheckAll"], function(data) {
   }
 });
 
-// Listen for messages from the popup.js
+/**
+ * Listens for messages from the popup.js script.
+ * If the action is "updateTextFields", retrieves the value of "addedText" from chrome.storage and updates the text fields.
+ */
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === "updateTextFields") {
     // Retrieve the value of "addedText" from chrome.storage
